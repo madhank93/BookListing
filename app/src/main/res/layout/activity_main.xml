@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/album_description_view"
+        android:id="@+id/search_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="@string/enter_title"
@@ -14,7 +14,7 @@
         android:inputType="textMultiLine" />
 
     <Button
-        android:id="@+id/next_button"
+        android:id="@+id/search_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/padding"
