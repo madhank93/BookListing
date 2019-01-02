@@ -1,5 +1,7 @@
 package madhank93.android.in.booklisting;
 
+import java.util.List;
+
 public class Book {
 
     public String getBookImageURL() {
@@ -18,19 +20,19 @@ public class Book {
         this.bookTitle = bookTitle;
     }
 
-    public String getAuthors() {
+    public List getAuthors() {
         return authors;
     }
 
-    public void setAuthors(String authors) {
+    public void setAuthors(List authors) {
         this.authors = authors;
     }
 
     private String bookImageURL;
     private String bookTitle;
-    private String authors;
+    private List authors;
 
-    public Book (String bookImageURL, String bookTitle, String authors) {
+    public Book (String bookImageURL, String bookTitle, List authors) {
         this.bookImageURL = bookImageURL;
         this.bookTitle = bookTitle;
         this.authors = authors;
