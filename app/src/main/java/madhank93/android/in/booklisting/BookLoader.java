@@ -2,6 +2,7 @@ package madhank93.android.in.booklisting;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.util.Log;
 
 import java.util.List;
 
@@ -34,6 +35,10 @@ public class BookLoader extends AsyncTaskLoader<List<Book>> {
             return null;
         }
 
-        return null;
+        String completeUrl = mUrl + mParams;
+
+        // Perform the network request, parse the response, and extract a list of earthquakes.
+        List<Book> books = QueryUtils.fetchEarthquakeData(completeUrl);
+        return books;
     }
 }

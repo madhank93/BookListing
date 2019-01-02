@@ -1,12 +1,21 @@
 package madhank93.android.in.booklisting;
 
+import android.text.TextUtils;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 public class QueryUtils {
@@ -26,12 +35,17 @@ public class QueryUtils {
      * Query the USGS dataset and return a list of {@link Book} objects.
      */
     public static List<Book> fetchEarthquakeData(String requestUrl) {
+
         // Create URL object
         URL url = createUrl(requestUrl);
 
         // Perform HTTP request to the URL and receive a JSON response back
         String jsonResponse = null;
-        jsonResponse = makeHttpRequest(url);
+        try {
+            jsonResponse = makeHttpRequest(url);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Problem making the HTTP request.", e);
+        }
 
         // Extract relevant fields from the JSON response and create a list of {@link Earthquake}s
         List<Book> books = extractFeatureFromJson(jsonResponse);
@@ -40,7 +54,56 @@ public class QueryUtils {
         return books;
     }
 
-    private static String makeHttpRequest(URL url) {
+    private static List<Book> extractFeatureFromJson(String jsonResponse) {
+
+        // If the JSON string is empty or null, then return early.
+        if (TextUtils.isEmpty(jsonResponse)) {
+            return null;
+        }
+
+        // Create an empty ArrayList that we can start adding earthquakes to
+        List<Book> books = new ArrayList<>();
+
+            try {
+                // Create a JSONObject from the JSON response string
+                JSONObject baseJsonResponse = new JSONObject(jsonResponse);
+
+                // Extract the JSONArray associated with the key called "features",
+                // which represents a list of features (or earthquakes).
+                JSONArray bookArray = baseJsonResponse.getJSONArray("items");
+
+                for (int i=0; i<bookArray.length(); i++) {
+
+                    // Get a single book at position i within the list of books
+                    JSONObject currentEarthquake = bookArray.getJSONObject(i);
+
+                    JSONObject volumeInfo = currentEarthquake.getJSONObject("volumeInfo");
+
+                    String title = volumeInfo.getString("title");
+
+                    JSONArray authors = volumeInfo.getJSONArray("authors");
+                    List<String> authorlist = new ArrayList<String>();
+                    for(int j = 0; j < authors.length(); j++){
+                        authorlist.add(authors.getString(j));
+                    }
+
+                    JSONObject imagelinks = volumeInfo.getJSONObject("imageLinks");
+                    String imageUrl = imagelinks.getString("thumbnail");
+
+                    Book book = new Book(imageUrl,title,authorlist);
+
+                    books.add(book);
+                }
+
+
+            } catch (JSONException e) {
+                Log.e("QueryUtils", "Problem parsing the book JSON results", e);
+            }
+
+        return books;
+    }
+
+    private static String makeHttpRequest(URL url) throws IOException {
 
         String jsonResponse = "";
 
@@ -79,7 +142,24 @@ public class QueryUtils {
                 inputStream.close();
             }
         }
+
         return jsonResponse;
+
+    }
+
+    private static String readFromStream(InputStream inputStream) throws IOException {
+
+        StringBuilder output = new StringBuilder();
+        if (inputStream != null) {
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
+            BufferedReader reader = new BufferedReader(inputStreamReader);
+            String line = reader.readLine();
+            while (line != null) {
+                output.append(line);
+                line = reader.readLine();
+            }
+        }
+        return output.toString();
 
     }
 
